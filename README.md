@@ -9,8 +9,13 @@ An accessible, customizable Augmentative and Alternative Communication (AAC) pla
 
 ## Roadmap
 - [ ] Basic AAC board layout  
-- [ ] Text-to-speech integration  
+- [ ] Input integration  
 - [ ] Avatar support  
+
+## Roles
+- Frontend (design & functionality)
+- Backend 
+- AI Integration
 
 ## Collaborators
 - Lance Santana
