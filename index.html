@@ -95,6 +95,7 @@
   @media (max-width: 900px){ .panel{ grid-template-columns: 1fr; } }
 
   .frame{ background:#24301f20; border-radius:14px; padding:10px; box-shadow: 0 2px 0 rgba(0,0,0,.12); }
+  .frame{ transition: background .32s ease, color .24s ease; }
   .screen{
     width:100%; aspect-ratio:16 / 9; border-radius:12px; object-fit:cover; display:block; background:#ddd;
     box-shadow: 0 2px 0 rgba(0,0,0,.18);
@@ -106,7 +107,7 @@
   .key{
     background:#d7e0cf; border:2px solid #c7d1bd; border-radius:10px; padding:14px 12px;
     text-align:center; font-weight:600; box-shadow:0 1px 0 rgba(0,0,0,.08); cursor:pointer;
-    transition: transform .06s ease, background .12s ease, border-color .12s ease; user-select:none;
+    transition: transform .12s ease, background .28s ease, border-color .28s ease, color .2s ease; user-select:none;
   }
   .key:active{ transform: translateY(1px); }
   .key:hover{ background:#e2e9d9; border-color:#b8c4ad; }
@@ -290,7 +291,7 @@
         const root = getComputedStyle(document.documentElement);
         const color = root.getPropertyValue(colorVar).trim() || '#98b38c';
 
-        // set key backgrounds and borders
+  // set key backgrounds and borders
         const keysEls = document.querySelectorAll('.key');
         // compute a darker border color by reducing lightness via a quick HSL conversion
         function hexToRgb(h){
@@ -298,16 +299,19 @@
           const bigint = parseInt(v,16);
           return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
         }
-        function rgbToHex(r,g,b){ return '#'+[r,g,b].map(x=> x.toString(16).padStart(2,'0')).join(''); }
-        function darker(col,amt){ try{ const [r,g,b]=hexToRgb(col); return rgbToHex(Math.max(0,r-amt),Math.max(0,g-amt),Math.max(0,b-amt)); }catch(e){ return col; } }
+  function rgbToHex(r,g,b){ return '#'+[r,g,b].map(x=> x.toString(16).padStart(2,'0')).join(''); }
+  function darker(col,amt){ try{ const [r,g,b]=hexToRgb(col); return rgbToHex(Math.max(0,r-amt),Math.max(0,g-amt),Math.max(0,b-amt)); }catch(e){ return col; } }
+  function lighter(col,amt){ try{ const [r,g,b]=hexToRgb(col); return rgbToHex(Math.min(255,r+amt),Math.min(255,g+amt),Math.min(255,b+amt)); }catch(e){ return col; } }
 
         const borderColor = darker(color,18);
         // decide text color based on perceived brightness
         function luminance([r,g,b]){ return 0.299*r + 0.587*g + 0.114*b; }
         const textColor = (luminance(hexToRgb(color)) > 150) ? '#0e0e0e' : '#ffffff';
 
+        // use a slightly lighter version of the tab color for the small buttons
+        const keyBg = lighter(color,30);
         keysEls.forEach(k=>{
-          k.style.background = color;
+          k.style.background = keyBg;
           k.style.borderColor = borderColor;
           k.style.color = textColor;
         });
@@ -318,6 +322,38 @@
           screen.style.background = color;
           screen.style.color = textColor;
         }
+
+        // tint the frame so the buttons inside feel like part of the color
+        const frame = document.querySelector('.frame');
+        try{
+          const rgb = hexToRgb(color);
+          if(frame && rgb && rgb.length===3){
+            frame.style.background = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.10)`;
+            frame.style.color = textColor;
+          }
+        }catch(e){}
+
+        // change the panel (the box that contains video + buttons) to a slightly darker version
+        try{
+          const panel = document.querySelector('.panel');
+          if(panel){
+            const panelColor = darker(color, 36); // darker by a noticeable amount
+            panel.style.background = panelColor;
+            // adjust panel text for contrast
+            const panelText = (luminance(hexToRgb(panelColor)) > 150) ? '#0e0e0e' : '#ffffff';
+            panel.style.color = panelText;
+          }
+        }catch(e){ /* ignore */ }
+
+        // update the decorative arc to match (more vibrant/translucent)
+        try{
+          const arc = document.querySelector('.arc-bg');
+          const rgb2 = hexToRgb(color);
+          if(arc && rgb2 && rgb2.length===3){
+            arc.style.background = `rgba(${rgb2[0]}, ${rgb2[1]}, ${rgb2[2]}, 0.26)`; // stronger tint
+            arc.style.boxShadow = `0 -10px 60px rgba(${rgb2[0]}, ${rgb2[1]}, ${rgb2[2]}, 0.08)`;
+          }
+        }catch(e){}
       }
 
     })();
