@@ -1,191 +1,178 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AutoRemind</title>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AAC Avatar</title>
 
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="table_style.css" />
+<style>
+  :root{
+    --ink:#0e0e0e; --muted:#6b6b6b; --line:#e8e8e8;
+    --sage:#7f8f73; --sage-900:#5a6a52; --sage-100:#e7efd9;
+    --tab-green:#98b38c; --tab-teal:#a8c6bd; --tab-blue:#9fb4d8;
+    --tab-purple:#b6a0bd; --tab-rose:#caa5a5;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink); background:#fff; }
+  .container{ width:min(1100px,92vw); margin:0 auto; }
 
-    <style>
-      :root{
-        --olive:#3e5f3a; --olive-dark:#2f472c; --pale:#e7efd9;
-        --text:#0e0e0e; --muted:#6b6b6b; --line:#e6e6e6;
-      }
-      *{ box-sizing:border-box; }
-      html,body{ margin:0; padding:0; }
-      body{ font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--text); background:#fff; }
-      .container{ width:min(1100px,92vw); margin:0 auto; }
+  /* NAV: left brand, centered links, right icon */
+  .nav{
+    display:grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items:center;
+    gap:16px;
+    padding:16px 20px;
+  }
+  .brand{ font-weight:700; font-size:22px; text-decoration:none; color:var(--ink); justify-self:start; }
+  .navlinks{ display:flex; gap:28px; align-items:center; justify-self:center; }
+  .navlinks a{ color:var(--ink); text-decoration:none; font-size:14px; }
+  .navlinks a:hover{ text-decoration:underline; }
+  .nav-actions{ justify-self:end; }
+  .avatar-btn{
+    width:36px; height:36px; border-radius:50%;
+    background:var(--sage); color:#fff; border:0; cursor:pointer;
+    display:grid; place-items:center; font-size:16px;
+  }
 
-      /* Top nav */
-      .nav{ position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between; padding:18px clamp(16px,4vw,28px); background:#fff; }
-      .brand{ font-size:28px; font-weight:700; text-decoration:none; color:var(--text); letter-spacing:.2px; }
-      .nav__right{ display:flex; gap:22px; align-items:center; }
-      .nav__link{ text-decoration:none; color:#111; font-size:15px; }
-      .nav__link:hover{ text-decoration:underline; }
-      .btn{ border:0; cursor:pointer; font-weight:600; border-radius:999px; padding:10px 16px; }
-      .btn--primary{ background:var(--olive); color:#fff; padding:10px 18px; }
-      .btn--primary:hover{ background:var(--olive-dark); }
+  /* TITLE (centered) */
+  .hero{ text-align:center; margin:18px 0 10px; }
+  .hero h1{ font-weight:500; font-size:clamp(26px,4.2vw,36px); margin:10px 0 0; }
 
-      /* Hero — centered horizontally */
-      .hero{
-        display:flex; justify-content:center; align-items:center;
-        text-align:center; margin:48px 0 24px; width:100%;
-      }
-      .hero h1{ font-size:clamp(28px,5vw,42px); margin:0; font-weight:500; } /* not bold */
+  /* TABS */
+  .tabs{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-start; padding:6px 0 12px; }
+  .tab{ padding:8px 14px; border-radius:24px; font-size:14px; font-weight:600; color:#263226; background:var(--tab-green); }
+  .tab.teal{ background:var(--tab-teal); }
+  .tab.blue{ background:var(--tab-blue); }
+  .tab.purple{ background:var(--tab-purple); }
+  .tab.rose{ background:var(--tab-rose); }
 
-      /* Divider with pill */
-      .divider{ position:relative; height:32px; margin:28px 0 20px; }
-      .divider::before{ content:""; position:absolute; left:0; right:0; top:50%; height:1px; background:var(--line); transform:translateY(-50%); }
-      .pill{ position:absolute; left:50%; transform:translate(-50%,-50%); top:50%; background:var(--pale); color:#263226; font-weight:600; padding:10px 18px; border-radius:999px; white-space:nowrap; box-shadow:0 1px 0 rgba(0,0,0,.04); }
+  /* MAIN PANEL */
+  .panel{
+    background:var(--sage);
+    border-radius:18px;
+    padding:18px;
+    display:grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap:18px;
+    box-shadow: inset 0 1px 0 rgba(0,0,0,.06);
+  }
+  @media (max-width: 900px){ .panel{ grid-template-columns: 1fr; } }
 
-      /* Two columns */
-      .grid{ display:grid; gap:40px; align-items:start; grid-template-columns:repeat(2,minmax(0,1fr)); }
-      @media (max-width:820px){ .grid{ grid-template-columns:1fr; } }
+  .frame{ background:#24301f20; border-radius:14px; padding:10px; box-shadow: 0 2px 0 rgba(0,0,0,.12); }
+  .screen{
+    width:100%; aspect-ratio:16 / 9; border-radius:12px; object-fit:cover; display:block; background:#ddd;
+    box-shadow: 0 2px 0 rgba(0,0,0,.18);
+  }
 
-      .label{ margin:10px 0 12px; font-weight:600; }
+  /* GRID OF BUTTONS */
+  .keys{ display:grid; gap:14px; grid-template-columns: repeat(3, minmax(0,1fr)); }
+  @media (max-width: 420px){ .keys{ grid-template-columns: repeat(2,minmax(0,1fr)); } }
+  .key{
+    background:#d7e0cf; border:2px solid #c7d1bd; border-radius:10px; padding:14px 12px;
+    text-align:center; font-weight:600; box-shadow:0 1px 0 rgba(0,0,0,.08); cursor:pointer;
+    transition: transform .06s ease, background .12s ease, border-color .12s ease; user-select:none;
+  }
+  .key:active{ transform: translateY(1px); }
+  .key:hover{ background:#e2e9d9; border-color:#b8c4ad; }
 
-      /* Clickable channel options */
-      .channels{ list-style:none; padding:0; margin:0; display:grid; gap:12px; }
-      .channels label{ display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; }
-      .channels input[type="checkbox"]{
-        position:absolute; opacity:0; width:1px; height:1px; overflow:hidden; /* accessible, visually hidden */
-      }
-      .dot{
-        width:14px; height:14px; border-radius:50%;
-        display:inline-block; background:#cfe2b3; border:2px solid #cfe2b3;
-        transition:background .15s, border-color .15s;
-      }
-      .channels input[type="checkbox"]:focus + .dot{ outline:2px solid #cfe2b3; outline-offset:2px; }
-      .channels input[type="checkbox"]:checked + .dot{ background:var(--olive); border-color:var(--olive); }
+  /* Center the container itself */
+  .container { margin-left:auto; margin-right:auto; }
 
-      /* Slider + number input */
-      .slider-row{ display:flex; align-items:center; gap:16px; margin-top:8px; }
-      .minmax{ font-size:14px; color:#333; }
-      input[type="range"]{ -webkit-appearance:none; width:100%; height:4px; background:var(--line); border-radius:999px; outline:none; }
-      input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--pale); border:2px solid var(--olive); }
-      input[type="range"]::-moz-range-thumb{ width:18px; height:18px; border-radius:50%; background:var(--pale); border:2px solid var(--olive); }
+  /* Title: center the block, not just the text */
+  .hero { display:grid; place-items:center; width:100%; }  /* full row, grid centers */
+  .hero h1 { margin:0; justify-self:center; text-align:center; }
 
-      .days-input-row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-      .num-input{
-        width:72px; appearance:textfield; -moz-appearance:textfield;
-        padding:8px 10px; border:1px solid var(--line); border-radius:10px;
-        font-size:15px;
-      }
-      .num-input:focus{ outline:2px solid #cfe2b3; border-color:#cfe2b3; }
+  /* Footer: same idea */
+  .footer-note { display:grid; place-items:center; text-align:center; width:100%; }
 
-      .cta-wrap{ display:flex; justify-content:center; margin:145px 0 36px; }
-      .btn--cta{ background:var(--olive); color:#fff; padding:12px 22px; border-radius:999px; font-size:16px; }
-      .btn--cta:hover{ background:var(--olive-dark); }
+  /* BELOW: ABOUT + HOW TO USE */
+  .lower{ display:grid; gap:30px; grid-template-columns: 1fr 1fr; margin:34px 0 20px; }
+  @media (max-width: 900px){ .lower{ grid-template-columns: 1fr; } }
+  h3{ margin:0 0 10px; font-size:20px; }
+  p, li{ color:#1b1b1b; line-height:1.55; }
 
-      /* Big green arc */
-      .arc-bg{ position:fixed; left:50%; transform:translateX(-50%); bottom:-35vh; width:130vw; height:60vh; border-radius:50% 50% 0 0 / 100% 100% 0 0; background:var(--pale); z-index:-1; }
+  /* FOOTER (centered, two lines) */
+  .footer-note{ text-align:center; margin:24px 0 36px; font-size:14px; line-height:1.4; }
+  .thanks{ display:block; color:var(--sage-900); font-weight:600; }
+  .feedback{ display:block; color:var(--sage-900); }
+</style>
+</head>
+<body>
 
-      /* Footer (renamed to avoid theme's blue .footer) */
-      .site-footer{ text-align:center; margin:8px auto 36px; background:transparent !important; }
-      .site-footer small, .site-footer small *{ outline:none; border:none; background:transparent; box-shadow:none; }
-      .thanks{ color:var(--olive-dark); font-weight:600; }
-      .feedback{ color:var(--olive); }
-    </style>
-  </head>
+  <!-- NAV -->
+  <header class="container nav">
+    <a class="brand" href="#">AAC Avatar</a>
+    <nav class="navlinks" aria-label="Primary">
+      <a href="#">Home</a>
+      <a href="#">How–to</a>
+      <a href="#">Accessibility</a>
+      <a href="#">About Us</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="avatar-btn" aria-label="Profile / Lock">🔒</button>
+    </div>
+  </header>
 
-  <body>
-    <!-- Top Nav -->
-    <header class="nav">
-      <div class="nav__left">
-        <a class="brand" href="./index.html">AutoRemind</a>
-      </div>
-      <nav class="nav__right">
-        <a href="./list.html" class="nav__link">How-to</a>
-        <a href="#" class="nav__link">Accessibility</a>
-        <a href="#" class="nav__link">About Us</a>
-        <a href="#" class="btn btn--primary">Contact Us</a>
-      </nav>
-    </header>
+  <!-- TITLE -->
+  <section class="container hero">
+    <h1>An avatar to build your voice.</h1>
+  </section>
 
-    <!-- Hero -->
-    <section class="hero">
-      <h1>Never miss an assignment.</h1>
-    </section>
+  <!-- TABS -->
+  <section class="container tabs">
+    <span class="tab">Social</span>
+    <span class="tab teal">Feelings</span>
+    <span class="tab blue">School</span>
+    <span class="tab purple">Restaurant</span>
+    <span class="tab rose">Family</span>
+  </section>
 
-    <!-- Content -->
-    <section class="container">
-      <div class="grid">
-        <!-- Left column -->
-        <div>
-          <div class="divider"><span class="pill">Reminder Channels</span></div>
-          <p class="label">Turn reminders on via:</p>
+  <!-- GREEN PANEL -->
+  <section class="container panel" aria-label="Avatar and quick phrases">
+    <div class="frame">
+      <video class="screen" src="your-video.mp4" poster="poster.jpg" controls></video>
+      <!-- Or: <img class="screen" src="your-image.jpg" alt="Avatar"> -->
+    </div>
 
-          <ul class="channels">
-            <li>
-              <label for="ch-discord">
-                <input id="ch-discord" type="checkbox" />
-                <span class="dot" aria-hidden="true"></span>
-                <span>Discord</span>
-              </label>
-            </li>
-            <li>
-              <label for="ch-sms">
-                <input id="ch-sms" type="checkbox" />
-                <span class="dot" aria-hidden="true"></span>
-                <span>SMS</span>
-              </label>
-            </li>
-            <li>
-              <label for="ch-email">
-                <input id="ch-email" type="checkbox" />
-                <span class="dot" aria-hidden="true"></span>
-                <span>Email</span>
-              </label>
-            </li>
-          </ul>
-        </div>
+    <div class="keys">
+      <button class="key">Yes</button><button class="key">No</button><button class="key">Chat</button>
+      <button class="key">Time</button><button class="key">Questions</button><button class="key">Food</button>
+      <button class="key">Drinks</button><button class="key">Places</button><button class="key">Me</button>
+      <button class="key">People</button><button class="key">Actions</button><button class="key">Activities</button>
+      <button class="key">Position</button><button class="key">Things</button><button class="key">Numbers</button>
+    </div>
+  </section>
 
-        <!-- Right column -->
-        <div>
-          <div class="divider"><span class="pill">Frequency &amp; Timing</span></div>
+  <!-- LOWER CONTENT -->
+  <section class="container lower">
+    <div>
+      <h3>About:</h3>
+      <p>
+        This AAC avatar provides a safe space to practice communication. Users can
+        explore common situations, like greetings, school, home, and social interactions,
+        by selecting buttons that let the avatar speak on their behalf. The goal is to
+        build confidence, fluency, and independence in everyday communication.
+      </p>
+    </div>
 
-          <div class="days-input-row">
-            <label for="days" class="label" style="margin:0;">Send reminder</label>
-            <input id="days" class="num-input" type="number" min="1" max="30" value="5" />
-            <span>days before deadline.</span>
-          </div>
+    <div>
+      <h3>How to Use:</h3>
+      <ul>
+        <li>Choose a tab (General, School, Greetings, etc.) to see related phrases.</li>
+        <li>Tap a button to have the avatar speak the word or phrase out loud.</li>
+        <li>Practice repeating the phrase with the avatar for confidence.</li>
+        <li>Switch tabs to explore different everyday situations.</li>
+      </ul>
+    </div>
+  </section>
 
-          <div class="slider-row" style="margin-top:14px;">
-            <span class="minmax">1</span>
-            <input
-              id="days-range"
-              type="range" min="1" max="30" value="5"
-              oninput="document.getElementById('days').value=this.value"
-            />
-            <span class="minmax">30</span>
-          </div>
-          <script>
-            // keep number input and slider in sync both ways
-            const num = document.getElementById('days');
-            const rng = document.getElementById('days-range');
-            num.addEventListener('input', () => {
-              const v = Math.min(30, Math.max(1, Number(num.value||1)));
-              num.value = v; rng.value = v;
-            });
-          </script>
-        </div>
-      </div>
+  <!-- FOOTER -->
+  <footer class="container footer-note">
+    <span class="thanks">Thanks for trying our tool!</span>
+    <span class="feedback">Share your feedback to help us improve.</span>
+  </footer>
 
-      <div class="cta-wrap">
-        <button class="btn btn--cta">AutoRemind Me!</button>
-      </div>
-    </section>
-
-    <!-- Arc + footer -->
-    <div class="arc-bg"></div>
-    <footer class="site-footer container">
-      <small>
-        <span class="thanks">Thanks for trying our tool.</span>
-        <span class="feedback"> Share your feedback to help us improve.</span>
-      </small>
-    </footer>
-  </body>
+</body>
 </html>
-<data value=""></data>
