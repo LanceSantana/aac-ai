@@ -38,7 +38,7 @@
   }
 
   /* TITLE (centered) */
-  .hero{ text-align:center; margin:18px 0 10px; }
+  .hero{ text-align:center; margin:18px 0 30px; }
   .hero h1{ font-weight:500; font-size:clamp(26px,4.2vw,36px); margin:10px 0 0; }
 
   /* TABS: half-pill tabs plugged into a long rounded bar */
@@ -257,8 +257,11 @@
         synth.speak(u);
       }
 
-      // Make keys speak their label on click
+      // Make keys play audio for a specific set of labels on click
       const keys = document.querySelectorAll('.key');
+      const speakKeys = new Set([
+        'yes','time','drinks','people','position','no','questions','places','actions','things','chat','food','me','activities','numbers'
+      ]);
       keys.forEach(k => {
         k.addEventListener('click', e => {
           const text = (k.textContent || k.innerText || '').trim();
@@ -266,7 +269,10 @@
           // small visual pressed feedback for keyboard users
           k.setAttribute('aria-pressed', 'true');
           setTimeout(()=> k.removeAttribute('aria-pressed'), 240);
-          speak(text);
+          // only play audio for the allowed words (case-insensitive)
+          if(speakKeys.has(text.toLowerCase())){
+            speak(text);
+          }
         });
       });
 
