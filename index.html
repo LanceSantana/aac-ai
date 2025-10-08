@@ -40,13 +40,46 @@
   .hero{ text-align:center; margin:18px 0 10px; }
   .hero h1{ font-weight:500; font-size:clamp(26px,4.2vw,36px); margin:10px 0 0; }
 
-  /* TABS */
-  .tabs{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-start; padding:6px 0 12px; }
-  .tab{ padding:8px 14px; border-radius:24px; font-size:14px; font-weight:600; color:#263226; background:var(--tab-green); }
-  .tab.teal{ background:var(--tab-teal); }
-  .tab.blue{ background:var(--tab-blue); }
-  .tab.purple{ background:var(--tab-purple); }
-  .tab.rose{ background:var(--tab-rose); }
+  /* TABS: half-pill tabs plugged into a long rounded bar */
+  .tabs{ position:relative; padding:12px 6px 0; }
+  .tabs-list{ display:flex; gap:10px; align-items:flex-start; position:relative; z-index:1; }
+
+  /* Individual tab buttons: top-only rounded (half-pill look) */
+  .tab{
+    --tab-height:44px;
+    height:var(--tab-height);
+    padding:8px 14px;
+    border:0;
+    border-radius:14px 14px 0 0; /* only top corners rounded */
+    font-weight:700;
+    font-size:14px;
+    color:var(--ink);
+    cursor:pointer;
+    user-select:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 0 rgba(0,0,0,.08);
+    transition: transform .16s ease, filter .12s ease, box-shadow .16s ease;
+    position:relative; z-index:0; white-space:nowrap;
+  }
+  .tab.sage   { background:var(--tab-green, var(--sage)); }
+  .tab.teal   { background:var(--tab-teal); }
+  .tab.blue   { background:var(--tab-blue); }
+  .tab.purple { background:var(--tab-purple); }
+  .tab.rose   { background:var(--tab-rose); }
+
+  /* Hover: slightly darker + lift (visual depth) */
+  .tab:hover, .tab:focus-visible{
+    filter:brightness(.94);
+    transform:translateY(-4px);
+    box-shadow:0 10px 20px rgba(19,29,15,.12);
+    z-index:3; /* ensure hovered tab sits above the bar */
+  }
+  .tab:active{ transform:translateY(-2px); filter:brightness(.9); box-shadow:0 6px 14px rgba(10,18,8,.14); }
+  .tab:focus{ outline:3px solid rgba(0,0,0,.08); outline-offset:4px; }
+
+  @media (max-width:420px){ .tabs-list{ flex-wrap:wrap; gap:8px; } .tab{ height:40px; padding:8px 12px; border-radius:12px 12px 0 0; } }
 
   /* MAIN PANEL */
   .panel{
@@ -76,6 +109,10 @@
   }
   .key:active{ transform: translateY(1px); }
   .key:hover{ background:#e2e9d9; border-color:#b8c4ad; }
+  .key:focus{ outline:3px solid rgba(37,101,45,0.18); outline-offset:2px; }
+
+  /* accessible helper to announce speech status */
+  .visually-hidden{ position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px, 1px, 1px, 1px); white-space:nowrap; }
 
   /* Center the container itself */
   .container { margin-left:auto; margin-right:auto; }
@@ -121,12 +158,14 @@
   </section>
 
   <!-- TABS -->
-  <section class="container tabs">
-    <span class="tab">Social</span>
-    <span class="tab teal">Feelings</span>
-    <span class="tab blue">School</span>
-    <span class="tab purple">Restaurant</span>
-    <span class="tab rose">Family</span>
+  <section class="container tabs" aria-label="Categories">
+    <div class="tabs-list">
+      <button class="tab sage" type="button">Social</button>
+      <button class="tab teal" type="button">Feelings</button>
+      <button class="tab blue" type="button">School</button>
+      <button class="tab purple" type="button">Restaurant</button>
+      <button class="tab rose" type="button">Family</button>
+    </div>
   </section>
 
   <!-- GREEN PANEL -->
@@ -173,6 +212,65 @@
     <span class="thanks">Thanks for trying our tool!</span>
     <span class="feedback">Share your feedback to help us improve.</span>
   </footer>
+
+  <!-- Accessible live region + behavior for buttons -->
+  <div id="speech-status" class="visually-hidden" aria-live="polite"></div>
+
+  <script>
+    (function(){
+      // Speak the button label using the Web Speech API (if available).
+      const synth = window.speechSynthesis;
+      const status = document.getElementById('speech-status');
+
+      function speak(text){
+        if(!synth){
+          // Fallback: update live region so assistive tech knows something happened
+          status.textContent = text;
+          return;
+        }
+        // cancel any current speech so quick taps interrupt
+        try{ synth.cancel(); }catch(e){}
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        u.rate = 0.95;
+        u.pitch = 1;
+        u.onstart = ()=> { status.textContent = 'Speaking: ' + text; };
+        u.onend = ()=> { status.textContent = ''; };
+        synth.speak(u);
+      }
+
+      // Make keys speak their label on click
+      const keys = document.querySelectorAll('.key');
+      keys.forEach(k => {
+        k.addEventListener('click', e => {
+          const text = (k.textContent || k.innerText || '').trim();
+          if(!text) return;
+          // small visual pressed feedback for keyboard users
+          k.setAttribute('aria-pressed', 'true');
+          setTimeout(()=> k.removeAttribute('aria-pressed'), 240);
+          speak(text);
+        });
+      });
+
+      // Tabs: toggle active class and set aria-selected (purely visual here)
+      const tabs = document.querySelectorAll('.tabs .tab');
+      tabs.forEach(tab => {
+        tab.setAttribute('role','tab');
+        tab.tabIndex = 0; // make focusable
+        tab.addEventListener('click', ()=> selectTab(tab));
+        tab.addEventListener('keydown', (e)=> { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTab(tab); } });
+      });
+
+      function selectTab(tab){
+        tabs.forEach(t=> t.classList.remove('active'));
+        tab.classList.add('active');
+        // announce selection
+        const name = (tab.textContent||tab.innerText||'').trim();
+        status.textContent = name + ' tab selected';
+      }
+
+    })();
+  </script>
 
 </body>
 </html>
