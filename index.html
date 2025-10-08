@@ -11,7 +11,7 @@
     --sage:#7f8f73; --sage-900:#5a6a52; --sage-100:#e7efd9;
     --tab-green:#98b38c; --tab-teal:#a8c6bd; --tab-blue:#9fb4d8;
     --tab-purple:#b6a0bd; --tab-rose:#caa5a5;
-    --pale: var(--sage-100);
+    --pale: var(--sage-100); 
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
@@ -126,11 +126,18 @@
   /* Footer: same idea */
   .footer-note { display:grid; place-items:center; text-align:center; width:100%; }
 
-  /* BELOW: ABOUT + HOW TO USE */
-  .lower{ display:grid; gap:30px; grid-template-columns: 1fr 1fr; margin:34px 0 20px; }
-  @media (max-width: 900px){ .lower{ grid-template-columns: 1fr; } }
+  /* BELOW: ABOUT + HOW TO USE
+     Center two fixed-width cards as a pair. Text inside cards remains left-aligned.
+     The .cards wrapper is centered with margin-inline:auto and max-width. On narrow screens the cards stack. */
+  .lower{ margin:34px 0 20px; }
+  .lower .cards{ display:flex; gap:30px; justify-content:center; align-items:flex-start; max-width:980px; margin-inline:auto; }
+  .lower .card{ width:440px; box-sizing:border-box; padding:0 8px; text-align:left; }
   h3{ margin:0 0 10px; font-size:20px; }
-  p, li{ color:#1b1b1b; line-height:1.55; }
+  .lower .card p, .lower .card ul{ color:#1b1b1b; line-height:1.55; max-width:48ch; }
+  @media (max-width: 900px){
+    .lower .cards{ flex-direction:column; gap:100px; align-items:center; }
+    .lower .card{ width:92vw; padding:0; }
+  }
 
   /* FOOTER (centered, two lines) */
   .footer-note{ text-align:center; margin:24px 0 36px; font-size:14px; line-height:1.4; }
@@ -204,24 +211,26 @@
 
   <!-- LOWER CONTENT -->
   <section class="container lower">
-    <div>
-      <h3>About:</h3>
-      <p>
-        This AAC avatar provides a safe space to practice communication. Users can
-        explore common situations, like greetings, school, home, and social interactions,
-        by selecting buttons that let the avatar speak on their behalf. The goal is to
-        build confidence, fluency, and independence in everyday communication.
-      </p>
-    </div>
+    <div class="cards">
+      <div class="card">
+        <h3>About:</h3>
+        <p>
+          This AAC avatar provides a safe space to practice communication. Users can
+          explore common situations, like greetings, school, home, and social interactions,
+          by selecting buttons that let the avatar speak on their behalf. The goal is to
+          build confidence, fluency, and independence in everyday communication.
+        </p>
+      </div>
 
-    <div>
-      <h3>How to Use:</h3>
-      <ul>
-        <li>Choose a tab (General, School, Greetings, etc.) to see related phrases.</li>
-        <li>Tap a button to have the avatar speak the word or phrase out loud.</li>
-        <li>Practice repeating the phrase with the avatar for confidence.</li>
-        <li>Switch tabs to explore different everyday situations.</li>
-      </ul>
+      <div class="card">
+        <h3>How to Use:</h3>
+        <ul>
+          <li>Choose a tab (General, School, Greetings, etc.) to see related phrases.</li>
+          <li>Tap a button to have the avatar speak the word or phrase out loud.</li>
+          <li>Practice repeating the phrase with the avatar for confidence.</li>
+          <li>Switch tabs to explore different everyday situations.</li>
+        </ul>
+      </div>
     </div>
   </section>
 
